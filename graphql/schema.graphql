@@ -1,0 +1,23 @@
+type Project {
+  id: ID!
+  name: String!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input CreateProjectInput {
+  name: String!
+}
+
+type Query {
+  listProjects: [Project]
+}
+
+type Mutation {
+  createProject(input: CreateProjectInput): Project
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}

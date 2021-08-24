@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  GraphQL API Template
+
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Parameters:
+  AppSyncApiName:
+    Type: String
+    Default: MyGraphQLApi
+    Description: The GraphQL Api Name
+  UserPoolId:
+    Type: String
+    Description: Cognito User Pool Id
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: nodejs14.x
+    Handler: index.handler
+    Tracing: Active
+
+Resources:
+  # Roles
+  AppSyncServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: AppSyncServiceRole
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: lambda:invokeFunction
+                Resource:
+                  - !Sub "arn:aws:lambda:${AWS::Region}:*:*"
+  # Lambda functions
+  createProjectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: createProject
+      CodeUri: ./resolvers/createProject
+  listProjectsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: listProjects
+      CodeUri: ./resolvers/listProjects
+  # Data Sources
+  createProjectDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQLApi.ApiId
+      Name: createProjectDataSource
+      Type: AWS_LAMBDA
+      ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+      LambdaConfig:
+        LambdaFunctionArn: !GetAtt createProjectFunction.Arn
+  listProjectsDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQLApi.ApiId
+      Name: listProjectsDataSource
+      Type: AWS_LAMBDA
+      ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+      LambdaConfig:
+        LambdaFunctionArn: !GetAtt listProjectsFunction.Arn
+  # Resolvers
+  createProjectResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQLApi.ApiId
+      FieldName: createProject
+      TypeName: Mutation
+      DataSourceName: !GetAtt createProjectDataSource.Name
+      RequestMappingTemplate: '{ "version" : "2017-02-28", "operation": "Invoke", "payload": { "arguments": $util.toJson($context.arguments), "identity": $util.toJson($context.identity) } }'
+      ResponseMappingTemplate: $util.toJson($ctx.result)
+  listProjectsResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQLApi.ApiId
+      FieldName: listProjects
+      TypeName: Query
+      DataSourceName: !GetAtt listProjectsDataSource.Name
+      RequestMappingTemplate: '{ "version" : "2017-02-28", "operation": "Invoke" }'
+      ResponseMappingTemplate: $util.toJson($ctx.result)
+  # Api
+  GraphQLApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: !Ref AppSyncApiName
+      AuthenticationType: AMAZON_COGNITO_USER_POOLS
+      UserPoolConfig:
+        UserPoolId: !Ref UserPoolId
+        AwsRegion: !Sub "${AWS::Region}"
+        DefaultAction: ALLOW
+  GraphQLSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt GraphQLApi.ApiId
+      DefinitionS3Location: "./schema.graphql"
+
+Outputs:
+  ApiUrl:
+    Description: "The GraphQL endpoint"
+    Value: !GetAtt GraphQLApi.GraphQLUrl

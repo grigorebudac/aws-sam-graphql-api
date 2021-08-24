@@ -1,0 +1,11 @@
+{
+  "name": "sam-graphql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "sam:build": "sam build",
+    "sam:deploy": "sam deploy",
+    "deploy": "npm run sam:build && npm run sam:deploy"
+  }
+}
