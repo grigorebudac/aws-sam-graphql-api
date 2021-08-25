@@ -49,11 +49,11 @@ Resources:
     Properties:
       FunctionName: createProject
       CodeUri: ./resolvers/createProject
-  listProjectsFunction:
+  getProjectsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: listProjects
-      CodeUri: ./resolvers/listProjects
+      FunctionName: getProjects
+      CodeUri: ./resolvers/getProjects
   # Data Sources
   createProjectDataSource:
     Type: AWS::AppSync::DataSource
@@ -64,15 +64,15 @@ Resources:
       ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
       LambdaConfig:
         LambdaFunctionArn: !GetAtt createProjectFunction.Arn
-  listProjectsDataSource:
+  getProjectsDataSource:
     Type: AWS::AppSync::DataSource
     Properties:
       ApiId: !GetAtt GraphQLApi.ApiId
-      Name: listProjectsDataSource
+      Name: getProjectsDataSource
       Type: AWS_LAMBDA
       ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
       LambdaConfig:
-        LambdaFunctionArn: !GetAtt listProjectsFunction.Arn
+        LambdaFunctionArn: !GetAtt getProjectsFunction.Arn
   # Resolvers
   createProjectResolver:
     Type: AWS::AppSync::Resolver
@@ -83,13 +83,13 @@ Resources:
       DataSourceName: !GetAtt createProjectDataSource.Name
       RequestMappingTemplate: '{ "version" : "2017-02-28", "operation": "Invoke", "payload": { "arguments": $util.toJson($context.arguments), "identity": $util.toJson($context.identity) } }'
       ResponseMappingTemplate: $util.toJson($ctx.result)
-  listProjectsResolver:
+  getProjectsResolver:
     Type: AWS::AppSync::Resolver
     Properties:
       ApiId: !GetAtt GraphQLApi.ApiId
-      FieldName: listProjects
+      FieldName: getProjects
       TypeName: Query
-      DataSourceName: !GetAtt listProjectsDataSource.Name
+      DataSourceName: !GetAtt getProjectsDataSource.Name
       RequestMappingTemplate: '{ "version" : "2017-02-28", "operation": "Invoke" }'
       ResponseMappingTemplate: $util.toJson($ctx.result)
   # Api
