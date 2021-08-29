@@ -1,6 +1,6 @@
-# GraphQL Api using AWS SAM and AWS AppSync
+# GraphQL API using AWS SAM and AWS AppSync
 
-The motivation behind this project was to create the underlying infrastructure of a GraphQL Api that is easy to extend, uses Cognito as the default authorizer, and the resolvers are connected to lambda functions so that you can have more control over the requests.
+The motivation behind this project was to create the underlying infrastructure of a GraphQL API that is easy to extend, uses Cognito as the default authorizer, and the resolvers are connected to lambda functions so that you can have more control over the requests.
 
 
 ## Prerequisite
