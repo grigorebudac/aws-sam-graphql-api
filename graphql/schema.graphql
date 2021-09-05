@@ -10,7 +10,7 @@ input CreateProjectInput {
 }
 
 type Query {
-  listProjects: [Project]
+  getProjects: [Project]
 }
 
 type Mutation {

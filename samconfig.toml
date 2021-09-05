@@ -2,9 +2,9 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = "sam-graphql"
+stack_name = "scarood"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1k35cehhnm3o3"
-s3_prefix = "sam-graphql"
+s3_prefix = "scarood"
 region = "us-east-1"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
